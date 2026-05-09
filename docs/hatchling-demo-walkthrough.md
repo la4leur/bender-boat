@@ -47,6 +47,20 @@
 
 > "See how credentials show green with the expiry date? The system tracks every cert. When something is coming up for renewal, this goes yellow at 90 days and red at 30. You'll never have someone show up for a rotation with an expired TWIC again."
 
+**Point to the D&A compliance bar.**
+
+> "Now look at this — Drug & Alcohol compliance, fleet-wide. Drug Free Vessel handles your testing program, the random selections, the MRO, chain of custody — we don't touch any of that. What we do is give you instant visibility into everyone's compliance status."
+
+**Point to a compliant crew member.**
+
+> "Green means compliant — last random test on record, negative result, MRO cleared. Yellow means someone's coming due. You see Chris Park is flagged 'Due Soon' — his last random was almost twelve months ago. The system tracks that automatically."
+
+**Point to Lisa Chen's pending result (in the relief pool).**
+
+> "Now look at Lisa Chen. She was randomly selected May 5th. The test was done but MRO clearance is still pending. Our system picks that up — and if you try to assign her to a crew change before it clears, you'll get a flag. You never put someone on a vessel with an unresolved D&A status."
+
+> "Right now, how do you track this? Email from Drug Free Vessel? A spreadsheet? What we're doing is making your existing program seamless — same administrator, same process, just complete visibility. The value is simple: never put someone on a boat who isn't compliant — and prove it to the Coast Guard in 30 seconds."
+
 **Transition:**
 > "Now let's look at how a voyage actually works."
 
@@ -97,9 +111,9 @@
 > "This is an interactive crew change scenario. I'm going to walk you through exactly what happens when you need to swap out your Chief Mate — from booking travel to handling the inevitable curveball. Every step you see here is how the actual system will work."
 
 ### Step 1: Book Travel
-**The scenario loads showing Lisa Chen as Chief Mate relief, flying SFO to Norfolk.**
+**The scenario loads showing Lisa Chen as Chief Mate relief, flying SFO to Bermuda.**
 
-> "Lisa Chen is your incoming Chief Mate relief. The system already knows her home airport, her credentials, and when she needs to be aboard. It's pulled flight options — and notice these aren't just regular consumer fares. You see the marine fare option? Those are the discounted rates through C Teleport that are specifically for crew travel. Right now you're paying ATPI about $2,000 a month for this kind of service."
+> "Lisa Chen is your incoming Chief Mate relief. The system already knows her home airport, her credentials, and when she needs to be aboard. It's pulled flight options — and notice these aren't just regular consumer fares. You see the marine fare option? Those are the discounted rates through C Teleport that are specifically for crew travel. And look — the system knows the vessel is arriving in Bermuda, so it's searching flights to BDA, not back to Norfolk. Right now you're paying ATPI about $2,000 a month for this kind of service."
 
 **Click to book a flight.**
 
@@ -130,11 +144,84 @@
 > "And here's the full audit trail. Every action, every decision, timestamped. If anyone ever asks 'why did we book that flight' or 'who approved the replacement' — it's all here."
 
 **Transition:**
-> "Now, let me show you what Kelly sees."
+> "Now, let me show you something that happened this morning."
 
 ---
 
-## TAB 6: CHANGES (3 minutes)
+## TAB 6: Lifeline 🚨 (3 minutes)
+
+**Click the Lifeline tab. The red badge should be showing.**
+
+> "Let me tell you something that happened this morning — literally today. A crew member's luggage broke at the airport. He went to Walmart for a new bag and missed his 6:15 AM flight. He called your admin team at 4:40 AM — on a Saturday. She woke up, couldn't reach the logistics coordinator who was in the middle of moving into a new house, but somehow a rebook got done. Your captain sent a formal email asking for a 24-hour travel hotline because this keeps happening and people are getting woken up during mandatory rest."
+
+**Pause. Let that land. Then gesture to the screen.**
+
+> "Here's the travel hotline. It never sleeps."
+
+### Crew Portal View (default view)
+
+> "When Marcus misses his flight, he taps this button on his phone. No phone call. No waking up the captain. No texting Kelly at 4:40 AM. He selects the reason — luggage issue — confirms his location, Juneau airport, and hits submit. Immediately gets a confirmation: help is on the way, do NOT book your own travel."
+
+### Coordinator View
+
+**Click the "Coordinator" view button.**
+
+> "Now watch what happens on the coordinator side. Sam gets a push notification — here's her dispatch console. She sees Marcus's location, the reason, the original booking, and three alternative flights the system already found — with costs. One shows no extra cost, one is $58 more, one routes through Seattle for $223 more. One tap to authorize. Marcus gets an updated travel packet on his phone. Done."
+
+**Point to the Captain Isolation Protocol box.**
+
+> "And notice who is NOT in this loop — the captain. The vessel gets one line: 'Marcus Webb travel disruption — shore team handling.' Captain Wilson sleeps through the night. STCW rest compliance maintained."
+
+### Accountability View
+
+**Click the "Accountability" view button.**
+
+> "Now here's the part that makes sure this doesn't become a habit. Every Lifeline is logged with a reason code and a fault classification. Crew fault, airline fault, or external. Jake Neilson here has two crew-fault incidents in six months — the system flagged him automatically for HR review. Total cost attributed to his missed flights: $580."
+
+**Point to the policy configuration section.**
+
+> "The message to crew is clear: this system will save your trip at 4 AM, but it will also remember why you needed saving."
+
+### AI Guardrails View ⭐⭐ (THE SHOWSTOPPER)
+
+**Click the "AI Guardrails" view button. Pause for effect.**
+
+> "Now here's where it gets really interesting. What if nobody had to wake up at all?"
+
+**Point to the three tiers: Green, Yellow, Red.**
+
+> "The system has configurable guardrails. Green tier — rebooking under $500, crew member has a clean record, same routing — the AI books it automatically. No phone call, no text, no human in the loop. Marcus gets rebooked in under two minutes."
+
+> "Yellow tier — cost is higher, maybe an alternate route is needed — the AI still picks the best option, but it flags it for your coordinator to review in the morning. Still no 4 AM wake-up."
+
+> "Red tier — over $1,500, or someone with a pattern of missed flights, or the vessel schedule is at risk — now a human gets a text. But even then, the system already found the options. Your coordinator replies 1, 2, or 3 to pick a flight. One text. Back to sleep."
+
+**Now click "Next Step" through the simulation. Walk Eric through each step slowly.**
+
+> "Watch what happens with this morning's exact scenario. Marcus submits at 4:42 AM..."
+
+**Step through all 7 steps. Let the timeline build on screen.**
+
+> "4:42, request comes in. 4:42, AI evaluates — cost delta is $180, clean record, same routing — Green tier. 4:43, Alaska 67 booked automatically through C Teleport. Updated travel packet on Marcus's phone. Vessel gets an outcome notification. And at 7:00 AM, Sam gets a one-paragraph summary with her morning coffee. Total resolution time: 61 seconds. Phone calls: zero. People woken up: zero."
+
+**Point to the results: "3 people who slept through it" stat.**
+
+> "Kelly slept. Sam slept. Captain Wilson slept. And Marcus is rebooked."
+
+**Scroll down to the configurable sliders.**
+
+> "And you control all of this, Eric. Want to raise the auto-authorize limit to $1,000? Move the slider. Want airline cancellations to always auto-approve regardless of cost? There's a toggle. Want a tighter pattern threshold — flag someone after just one missed flight? Adjust it. These are your rules, not ours."
+
+**Point to the morning digest preview.**
+
+> "This is what Sam's morning looks like instead of a 4:40 AM phone call. Clean summary, every dollar tracked, every decision logged, every rebooking already handled."
+
+**Transition:**
+> "And every one of these emergency rebookings shows up in Kelly's expense portal too — the cost delta is tracked automatically. Let me show you."
+
+---
+
+## TAB 7: CHANGES (3 minutes)
 
 **Click the Changes tab.**
 
@@ -150,18 +237,28 @@
 
 **Click the "By Crew" view.**
 
-> "This is the view that replaces the spreadsheet reconciliation. Every cost event grouped by crew member. Lisa Chen — booked $487, cancelled, refund pending $487, net zero. Andy Brooks — replacement booking, $342. Kelly can see the full financial story of every crew member's travel."
+> "This is the view that replaces the spreadsheet reconciliation. Every cost event grouped by crew member. Lisa Chen — booked $587, cancelled, refund pending $587, net zero. Andy Brooks — replacement booking, $498. Kelly can see the full financial story of every crew member's travel."
 
 **Click the "Refunds" view.**
 
-> "And here's the refund tracker. Pending, processing, credited — with amounts. No more calling the airline to check on a refund status. No more wondering if that $487 ever came back."
+> "And here's the refund tracker. Pending, processing, credited — with amounts. No more calling the airline to check on a refund status. No more wondering if that $587 ever came back."
+
+### 💡 The Real-World Hook (Use This)
+
+> *"Let me tell you a real story. Your team recently had an airline refund show up on a credit card statement — and nobody could identify which crew member it belonged to. Not the travel agency, not your operations team, not the airline. In our system, that can't happen. Every cost event — every booking, every change, every refund — is chained to a specific crew member, a specific voyage, and a specific assignment. Kelly would see exactly who it belongs to, instantly."*
+
+**[Point to the refund row in the demo]** "See this Lisa Chen refund? $587 credited, linked to the original booking, linked to the cancellation reason, linked to the replacement booking for Andy Brooks. Full chain of custody."
+
+---
+
+### The Transition Beat
 
 **Transition:**
 > "Now let me show you what we built for the travel planning side — this is what replaces ATPI."
 
 ---
 
-## TAB 7: TRAVEL (5 minutes)
+## TAB 8: TRAVEL (5 minutes)
 
 **Click the Travel tab. You'll see four sub-tabs.**
 
@@ -171,7 +268,7 @@
 
 **Show the three crew search cards.**
 
-> "Three crew members need to travel for this crew change. Each one has fuzzy search criteria — not just one airport, but multiple origin airports near their home. Lisa's near San Francisco, so we're searching SFO, Oakland, and San Jose. Not just Norfolk as a destination — we're also checking Newport News and Richmond. And not just one date — a window of June 15th through 18th."
+> "Three crew members need to travel for this crew change. Each one has fuzzy search criteria — not just one airport, but multiple origin airports near their home. Lisa's near San Francisco, so we're searching SFO, Oakland, and San Jose. The destination is BDA — Bermuda's only airport. And not just one date — a window of June 15th through 18th."
 
 **Click into Lisa's search results.**
 
@@ -191,9 +288,15 @@
 
 > "This is something ATPI definitely doesn't do. Once flights are booked, the system builds a ground logistics plan. Who's arriving when, who's staying where, who's got a rental car, who's riding with whom, and what order you pick everyone up."
 
+**[Scroll to Hotel Picker]**
+
+> *"Before we even get to pickup logistics — hotel selection. Here's every hotel option near Hamilton Harbour. Corporate rate, rack rate, reimbursable or not, distance from port, amenities, booking method. Your ops team picks from this, assigns rooms, and it flows into the crew's travel packet automatically."*
+
+> *"See this toggle? 'Reimbursable only.' One click and the $695/night resort disappears. Company policy cap is $300/night — we enforce that at the selection level, not after the expense report. And look — corporate direct rates vs. OTA. Ian's point about going direct to hotel chains? Built right in."*
+
 **Point to the pickup sequence.**
 
-> "Dave Winters arrives the evening before — he's the priority arrival for the captain handover briefing. He's got the rental car. Next day, Lisa arrives at 1340 at Norfolk, Andy arrives at 0730 at Newport News — Dave picks up Andy on the way to the dock since PHF is en route. It even accounts for the fact that Lisa needs 10 hours of rest before she can stand watch because she's crossing three time zones."
+> "Dave Winters arrives the evening before — he's the priority arrival for the captain handover briefing. He takes a taxi from BDA to the Hamilton Princess. Next day, Lisa and Andy share a taxi from Grotto Bay — that's the budget hotel near the airport — to Hamilton Harbour where the vessel is berthed. And notice — no rental cars. The system knows you can't rent cars in Bermuda, so it's coordinating taxis and hotel shuttles instead. It even accounts for the fact that Lisa needs 10 hours of rest before she can stand watch because she's crossing three time zones."
 
 **Point to the logistics tags.**
 
@@ -231,17 +334,35 @@
 
 ---
 
+## INTEGRATION PITCH — Gusto Sync
+
+> *"One more thing — if Standing Tide runs payroll through Gusto, we wire directly into it. Crew profiles sync automatically. When someone's hired, promoted, gets a new credential, or is terminated in Gusto — it flows straight into the vessel roster. No double-entry. Your HR data IS your crew data."*
+
+**Key points if Eric asks:**
+- Gusto API gives us: name, email, phone, DOB, job title, department, hire date, employment status, compensation
+- We already have the schema for it — `crew_members` table maps 1:1 to Gusto employee records
+- Sync runs on a schedule — changes propagate within minutes
+- Credentials still managed in our system (Gusto doesn't track MMCs or STCW certs) but the person record stays in sync
+
+---
+
 ## THE CLOSE (2 minutes)
 
 **Pause. Let it sink in. Then:**
 
 > "Eric, let me put the numbers on the table. HELM quoted you about $20,000 a year for the three vessels. You're paying ATPI about $24,000 a year for crew travel management. That's $44,000 a year — $220,000 over five years — for two separate systems that don't talk to each other."
 
+> *"And that D-A / Atriis travel platform? $25,200 a year just for the base — and you don't even get reporting without paying another $400 a month. We replace that too."*
+
 > "What I just showed you is one system that does both. Vessel operations, crew management, watch standing, travel planning, expense tracking, visa management, ground logistics — all connected. When a voyage delays, it flags the affected flights. When a flight rebooks, Kelly sees the cost change. When a crew member's credential expires, the system catches it before they show up for rotation."
 
-> "And here's the part that matters most to you: this is *your* instance. Your data stays on your server. You own the source code. No per-user fees, no per-vessel fees, no annual subscription that goes up every year. One build, you own it, done."
+> "Here's the bottom line on cost. Phase 1 — everything you just saw — vessel ops, crew management, watch system, crew changes, Kelly's expense portal, the full travel suite — that's **$2,500 a month**. When we add the engineering module — planned maintenance, parts inventory, work orders — it goes to **$4,000 a month**."
 
-> "We can have V1 in your hands in 10 weeks. Vessel operations, crew management, the watch system, and the full travel workflow. Post-launch, we wire in C Teleport for automated fare search — the marine fares you saw in the demo — and Kelly gets her QuickBooks export. That's the whole picture."
+> "Compare that to what you're looking at now. HELM is quoting $20,000 a year. Direct Accommodations is running about $25,000 a year stripped down — and that's without Duty of Care or reporting. That's $45,000 a year for two disconnected systems that still can't trace a refund to a crew member."
+
+> "Over five years, our solution actually comes in **cheaper** — $222,000 versus $226,000 — and you get a unified, tailored system with full data portability. Your data lives on your infrastructure. If you ever want to walk away, you take everything with you. No lock-in."
+
+> "We can have V1 in your hands in 10 weeks. Post-launch, we wire in C Teleport for automated fare search and Gusto for crew sync — those are included in the subscription. That's the whole picture."
 
 > "What questions do you have?"
 
@@ -253,7 +374,10 @@
 > "Same instance, same database. You add a vessel in the system and it inherits the same crew pool, same watch structure, same travel workflow. Your three SANSU Bender Class boats share crew already — the system is designed for that."
 
 **"What does this cost?"**
-> "We'll give you a firm fixed price for the build. No recurring subscription fees, no per-seat licensing. You're paying for the development and you own what we build. Hosting costs are minimal — we're talking about $20 to $50 a month for the server, not $44,000 a year."
+> "$2,500 a month for the full platform — ops, crew, travel, the works. When we add engineering, it goes to $4,000. Over five years that's $222,000 versus $226,000 for HELM plus D-A — and you're getting one unified system instead of two disconnected tools. Hosting, maintenance, support, and future integrations like C Teleport and Gusto are all included."
+
+**"Why subscription instead of a one-time build fee?"**
+> "Because you're not just buying software — you're buying a living system. We maintain it, we update it, we add integrations, we handle support. And honestly, at $2,500 a month you're paying less than what D-A charges just for travel — and getting ten times more."
 
 **"Can Kelly actually use this?"**
 > "Kelly's view is the Changes tab and the Travel Planner. She doesn't need to see the watch system or the navigation log. Role-based access means she sees exactly what she needs — expenses, refunds, travel bookings — and nothing she doesn't."
@@ -262,10 +386,10 @@
 > "HELM gives you planned maintenance, some crew management, and basic voyage tracking. What they don't give you is the travel integration, the expense tracking, the visa management, or the ground logistics. You'd still need ATPI for travel and spreadsheets for the rest. We're replacing both in one system."
 
 **"What about maintenance tracking?"**
-> "That's on the post-V1 roadmap. We focused first on the crew and travel side because that's where your pain is and where the money is. Planned maintenance, parts inventory, and work orders are Phase 2. And because you own the codebase, you can prioritize what comes next."
+> "That's Phase 2 — the engineering module. Planned maintenance, parts inventory, work orders, regulatory compliance tracking. When we add that, the subscription goes from $2,500 to $4,000. We focused Phase 1 on crew and travel because that's where your pain is right now and where the immediate savings are."
 
-**"What if we need changes after delivery?"**
-> "You own the source code. We can make changes, you can hire someone else to make changes, or you can modify it yourself. No vendor lock-in. That's the whole point."
+**"What if we need changes or want to leave?"**
+> "Your data lives on Supabase — industry-standard Postgres. You can export a full SQL dump any day of the week. No proprietary formats, no lock-in. And because the subscription includes ongoing development, feature requests and customizations are part of the deal — you're not paying change-order fees every time you need something adjusted."
 
 ---
 
