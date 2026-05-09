@@ -150,6 +150,26 @@ export interface HotelAssignment {
   notes?: string;
 }
 
+export interface PortHotel {
+  id: string;
+  name: string;
+  address: string;
+  distanceFromPort: string;      // e.g., "0.3 mi" from Hamilton Harbour
+  walkingMinutes: number;
+  nightlyRate: number;
+  corporateRate?: number;        // if corporate account available
+  reimbursable: boolean;         // within company policy
+  maxReimbursable?: number;      // max reimbursable amount per night
+  amenities: string[];           // shuttle, parking, breakfast, kitchen, wifi, pool, gym, laundry
+  hotelChain?: string;           // Marriott, Hilton, IHG, Independent
+  loyaltyProgram?: string;       // Marriott Bonvoy, Hilton Honors, etc.
+  bookingMethod: 'corporate_direct' | 'ota' | 'port_agent' | 'phone';
+  rating: number;                // 1-5 stars
+  crewNotes?: string;            // previous crew feedback
+  availability: 'available' | 'limited' | 'sold_out';
+  phone?: string;
+}
+
 export interface GroundTransport {
   type: 'rental' | 'taxi' | 'rideshare' | 'port_agent' | 'crew_vehicle';
   provider?: string;

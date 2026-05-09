@@ -103,10 +103,10 @@ function PacketPreview({ packet }: { packet: TravelPacket }) {
           <div>
             <div className="font-bold">⚓ Port Information</div>
             <div className="opacity-70 ml-4">
-              <div>Norfolk Naval Station, Pier 6</div>
-              <div>Gate: Main Gate — Hampton Blvd entrance</div>
-              <div>Security: TWIC required for base access</div>
-              <div>Port Agent: Meyer Agencies — (757) 555-0800</div>
+              <div>Hamilton Harbour, Front Street Dock, Hamilton, Bermuda</div>
+              <div>Access: Front Street public dock — no base security gate</div>
+              <div>Port Agent: Meyer Agencies Ltd. — +1-441-295-4176</div>
+              <div>Note: No rental cars in Bermuda — taxi or hotel shuttle only</div>
             </div>
           </div>
         )}
@@ -117,7 +117,7 @@ function PacketPreview({ packet }: { packet: TravelPacket }) {
             <div className="font-bold">🚢 Vessel Location</div>
             <div className="opacity-70 ml-4">
               <div>M/V HATCHLING — SANSU Bender Class</div>
-              <div>Berth: Pier 6, Slip 3 (port side to)</div>
+              <div>Berth: Hamilton Harbour, Front Street Dock (port side to)</div>
               <div>Gangway: Amidships, starboard side</div>
             </div>
           </div>
@@ -128,9 +128,9 @@ function PacketPreview({ packet }: { packet: TravelPacket }) {
           <div>
             <div className="font-bold">🆘 Emergency Contacts</div>
             <div className="opacity-70 ml-4">
-              <div>Vessel: +1 (757) 555-0101 (Bridge)</div>
+              <div>Vessel: +1 (757) 555-0101 (Bridge — Iridium sat phone)</div>
               <div>Ops Manager: +1 (757) 555-0102</div>
-              <div>Port Agent: +1 (757) 555-0800</div>
+              <div>Port Agent (Bermuda): +1-441-295-4176 (Meyer Agencies Ltd.)</div>
               <div>Standing Tide Office: +1 (757) 555-0200</div>
             </div>
           </div>
@@ -266,7 +266,7 @@ export default function TravelPacketsView() {
             <div className="flex items-center gap-2">
               <Users size={16} className="text-primary" />
               <div>
-                <span className="font-bold text-sm">Group Push — Norfolk Crew Change</span>
+                <span className="font-bold text-sm">Group Push — Bermuda Crew Change</span>
                 <span className="text-xs opacity-60 ml-2">Send or update packets for all relief crew</span>
               </div>
             </div>

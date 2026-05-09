@@ -148,7 +148,7 @@ export const CrewChangeWorkflow: React.FC<{}> = () => {
           <ArrowRightLeft size={20} className="text-primary" />
           <div>
             <div className="font-semibold">Crew Change — Chief Mate</div>
-            <div className="text-xs text-base-content/60">Norfolk, VA • {step === 'delayed' || step === 'rebooked' ? 'May 19' : 'May 17'}, 2026</div>
+            <div className="text-xs text-base-content/60">Hamilton, Bermuda • {step === 'delayed' || step === 'rebooked' ? 'May 19' : 'May 17'}, 2026</div>
           </div>
         </div>
         <div className="flex items-center gap-2">
@@ -198,7 +198,7 @@ export const CrewChangeWorkflow: React.FC<{}> = () => {
           {step === 'init' && (
             <div className="space-y-2">
               <div className="text-xs text-base-content/60 mb-2">
-                Lisa Chen needs to fly from <span className="font-semibold">SFO → ORF</span> to arrive by May 17. Select a flight:
+                Lisa Chen needs to fly from <span className="font-semibold">SFO → BDA</span> to arrive by May 17. Select a flight:
               </div>
               {flightOptions.map(f => (
                 <FlightCard key={f.id} flight={f} onSelect={handleBookFlight} />
@@ -316,7 +316,7 @@ export const CrewChangeWorkflow: React.FC<{}> = () => {
                       <div>
                         <span className="font-semibold">Bring in Andy Brooks</span> as Third Mate relief
                         <div className="text-base-content/60 mt-0.5">Credentials: Third Mate Unlimited ✓ • STCW ✓ • TWIC ✓ • Medical ✓ — FULLY QUALIFIED</div>
-                        <div className="text-base-content/60">Home airport: ATL • Needs flight ATL → ORF</div>
+                        <div className="text-base-content/60">Home airport: ATL • Needs flight ATL → BDA</div>
                       </div>
                     </div>
                   </div>

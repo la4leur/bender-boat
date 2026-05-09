@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import { MapPin, Clock, Hotel, Car, Users, AlertTriangle, ChevronDown, ChevronUp, Navigation } from 'lucide-react';
-import { CrewLogisticsPlan, LogisticsTag } from '../types';
-import { crewLogisticsPlans } from '../data';
+import { MapPin, Clock, Hotel, Car, Users, AlertTriangle, ChevronDown, ChevronUp, Navigation, Star, DollarSign, Check, X, ExternalLink, Phone } from 'lucide-react';
+import { CrewLogisticsPlan, LogisticsTag, PortHotel } from '../types';
+import { crewLogisticsPlans, portHotels } from '../data';
 
 function TagBadge({ tag }: { key?: string; tag: LogisticsTag }) {
   const colorMap: Record<string, string> = {
@@ -134,6 +134,158 @@ function CrewLogisticsCard({ plan, index }: { key?: string; plan: CrewLogisticsP
   );
 }
 
+function HotelPicker() {
+  const [sortBy, setSortBy] = useState<'distance' | 'price' | 'rating'>('distance');
+  const [showOnlyReimbursable, setShowOnlyReimbursable] = useState(false);
+
+  const filtered = portHotels
+    .filter(h => !showOnlyReimbursable || h.reimbursable)
+    .sort((a, b) => {
+      if (sortBy === 'price') return (a.corporateRate || a.nightlyRate) - (b.corporateRate || b.nightlyRate);
+      if (sortBy === 'rating') return b.rating - a.rating;
+      return a.walkingMinutes === -1 ? 1 : b.walkingMinutes === -1 ? -1 : a.walkingMinutes - b.walkingMinutes;
+    });
+
+  const amenityIcons: Record<string, string> = {
+    wifi: '📶', pool: '🏊', gym: '💪', breakfast: '🍳', shuttle: '🚐',
+    restaurant: '🍽️', beach_access: '🏖️', kitchen: '🍳', laundry: '👕',
+    parking: '🅿️', spa: '💆', golf: '⛳', garden: '🌿', concierge: '🔔',
+    business_center: '💼', cave_pool: '🏊', kayaks: '🛶', tennis: '🎾',
+    afternoon_tea: '☕',
+  };
+
+  return (
+    <div className="card bg-base-100 border border-base-300 shadow-sm">
+      <div className="card-body p-4">
+        <div className="flex items-center justify-between flex-wrap gap-2">
+          <h3 className="font-bold text-sm flex items-center gap-2">
+            <Hotel size={14} className="text-primary" />
+            Hotel Picker — Hamilton, Bermuda
+          </h3>
+          <div className="flex items-center gap-2">
+            <label className="label cursor-pointer gap-1.5 p-0">
+              <span className="label-text text-xs">Reimbursable only</span>
+              <input type="checkbox" className="toggle toggle-xs toggle-primary" checked={showOnlyReimbursable} onChange={() => setShowOnlyReimbursable(!showOnlyReimbursable)} />
+            </label>
+            <select className="select select-xs select-bordered" value={sortBy} onChange={e => setSortBy(e.target.value as any)}>
+              <option value="distance">Distance from port</option>
+              <option value="price">Price (low → high)</option>
+              <option value="rating">Rating</option>
+            </select>
+          </div>
+        </div>
+
+        <div className="overflow-x-auto mt-3">
+          <table className="table table-xs">
+            <thead>
+              <tr>
+                <th>Hotel</th>
+                <th>Distance</th>
+                <th>Rate</th>
+                <th>Reimbursable</th>
+                <th>Amenities</th>
+                <th>Booking</th>
+                <th>Availability</th>
+              </tr>
+            </thead>
+            <tbody>
+              {filtered.map(hotel => (
+                <tr key={hotel.id} className={!hotel.reimbursable ? 'opacity-60' : ''}>
+                  <td>
+                    <div className="font-semibold">{hotel.name}</div>
+                    <div className="text-xs opacity-60">{hotel.address}</div>
+                    <div className="flex gap-0.5 mt-0.5">
+                      {Array.from({ length: hotel.rating }).map((_, i) => (
+                        <Star key={i} size={10} className="text-warning fill-warning" />
+                      ))}
+                    </div>
+                    {hotel.hotelChain && <div className="text-xs opacity-50">{hotel.hotelChain}{hotel.loyaltyProgram ? ` · ${hotel.loyaltyProgram}` : ''}</div>}
+                  </td>
+                  <td>
+                    <div className="font-mono text-xs">{hotel.distanceFromPort}</div>
+                    <div className="text-xs opacity-60">
+                      {hotel.walkingMinutes > 0 ? `${hotel.walkingMinutes} min walk` : 'Taxi/shuttle'}
+                    </div>
+                  </td>
+                  <td>
+                    <div className="text-xs">
+                      {hotel.corporateRate ? (
+                        <>
+                          <span className="font-bold text-success">${hotel.corporateRate}</span>
+                          <span className="opacity-40 line-through ml-1">${hotel.nightlyRate}</span>
+                          <div className="text-xs text-success">Corporate rate</div>
+                        </>
+                      ) : (
+                        <span className="font-bold">${hotel.nightlyRate}</span>
+                      )}
+                    </div>
+                  </td>
+                  <td>
+                    {hotel.reimbursable ? (
+                      <div className="flex items-center gap-1">
+                        <Check size={12} className="text-success" />
+                        <span className="text-xs text-success">Yes</span>
+                        {hotel.maxReimbursable && (
+                          <span className="text-xs opacity-50">(≤${hotel.maxReimbursable})</span>
+                        )}
+                      </div>
+                    ) : (
+                      <div className="flex items-center gap-1">
+                        <X size={12} className="text-error" />
+                        <span className="text-xs text-error">No</span>
+                      </div>
+                    )}
+                  </td>
+                  <td>
+                    <div className="flex flex-wrap gap-0.5 max-w-[160px]">
+                      {hotel.amenities.slice(0, 5).map(a => (
+                        <span key={a} className="tooltip tooltip-bottom" data-tip={a.replace(/_/g, ' ')}>
+                          <span className="text-xs">{amenityIcons[a] || '·'}</span>
+                        </span>
+                      ))}
+                      {hotel.amenities.length > 5 && (
+                        <span className="text-xs opacity-50">+{hotel.amenities.length - 5}</span>
+                      )}
+                    </div>
+                  </td>
+                  <td>
+                    <span className={`badge badge-xs ${hotel.bookingMethod === 'corporate_direct' ? 'badge-success' : hotel.bookingMethod === 'phone' ? 'badge-info' : 'badge-ghost'}`}>
+                      {hotel.bookingMethod === 'corporate_direct' ? 'Corporate' : hotel.bookingMethod === 'phone' ? 'Direct' : hotel.bookingMethod === 'port_agent' ? 'Port Agent' : 'OTA'}
+                    </span>
+                  </td>
+                  <td>
+                    <span className={`badge badge-xs ${hotel.availability === 'available' ? 'badge-success' : hotel.availability === 'limited' ? 'badge-warning' : 'badge-error'}`}>
+                      {hotel.availability === 'available' ? 'Available' : hotel.availability === 'limited' ? 'Limited' : 'Sold Out'}
+                    </span>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+
+        {/* Crew notes */}
+        <div className="mt-3 space-y-1">
+          <div className="text-xs font-semibold opacity-70">💡 Crew Notes</div>
+          {filtered.filter(h => h.crewNotes).slice(0, 3).map(hotel => (
+            <div key={hotel.id} className="text-xs bg-base-200 rounded px-2 py-1">
+              <span className="font-semibold">{hotel.name}:</span> <span className="opacity-70 italic">{hotel.crewNotes}</span>
+            </div>
+          ))}
+        </div>
+
+        {/* Policy reminder */}
+        <div className="alert alert-info mt-3 py-2">
+          <AlertTriangle size={14} />
+          <span className="text-xs">
+            <strong>Company Policy:</strong> Nightly reimbursement cap: $300. Corporate rates require booking via direct account. Receipts required for all lodging over $100/night.
+          </span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function GroundLogistics() {
   const plans = crewLogisticsPlans;
   const sorted = [...plans].sort((a, b) => a.pickupSequence - b.pickupSequence);
@@ -172,12 +324,15 @@ export default function GroundLogistics() {
         </div>
       </div>
 
+      {/* Hotel Picker */}
+      <HotelPicker />
+
       {/* Pickup timeline */}
       <div className="card bg-base-100 border border-base-300 shadow-sm">
         <div className="card-body p-4">
           <h3 className="font-bold text-sm flex items-center gap-2">
             <MapPin size={14} className="text-primary" />
-            Pickup Sequence — Norfolk Crew Change
+            Pickup Sequence — Bermuda Crew Change
           </h3>
           <div className="overflow-x-auto mt-2">
             <table className="table table-xs">
@@ -205,7 +360,7 @@ export default function GroundLogistics() {
                       {new Date(plan.arrivalTime).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}<br />
                       {new Date(plan.arrivalTime).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}
                     </td>
-                    <td className="text-xs">{plan.hotel?.hotelName?.replace('Norfolk Naval Station', '').replace('Norfolk Waterside', '').trim() || '—'}</td>
+                    <td className="text-xs">{plan.hotel?.hotelName?.replace(' & Beach Club', '').replace(' Beach Resort', '').trim() || '—'}</td>
                     <td className="text-xs capitalize">{plan.groundTransport?.type.replace('_', ' ') || '—'}</td>
                     <td className="font-mono text-xs">
                       {plan.groundTransport ? new Date(plan.groundTransport.pickupTime).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }) : '—'}
