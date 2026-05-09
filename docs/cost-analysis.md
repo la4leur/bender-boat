@@ -91,33 +91,51 @@ Once deployed and running for all 3 SANSU vessels:
 ### Their Current Stack
 | Service | Annual | 5-Year |
 |---------|--------|--------|
-| HELM (vessel ops) | $20,000 | $100,000 |
-| D-A / Atriis (travel) | $25,200 | $126,000 |
-| **Current Total** | **$45,200** | **$226,000** |
+| HELM (vessel ops) | ~$20,000 | $100,000 |
+| D-A / Atriis (travel) | ~$25,200 ($1,600/mo base + $10/PNR) | $126,000 |
+| **Current Total** | **~$45,200** | **$226,000** |
 
 *And they still have the "mystery refund" problem. No unified system. No crew change workflow. No visa tracking.*
 
-### Our Solution — Subscription Model
-| Phase | Monthly | Annual | 5-Year |
-|-------|---------|--------|--------|
-| Phase 1: Ops + Crew + Travel | $2,500 | $30,000 | $30,000 (Year 1) |
-| Phase 2: + Engineering | $4,000 | $48,000 | $192,000 (Years 2–5) |
-| **Total** | | | **$222,000** |
+### Our Solution — Blended Subscription + PNR Model
+
+| Phase | Subscription | PNR Fee | Est. Annual (3 vessels, ~200 PNRs/yr) |
+|-------|-------------|---------|---------------------------------------|
+| Phase 1: Ops + Crew + Travel | $1,880/mo ($22,600/yr) | $20/PNR | **~$26,600/yr** |
+| Phase 2: + Engineering | $3,000/mo ($36,000/yr) | $20/PNR | **~$40,000/yr** |
+
+#### PNR Service Fee Justification ($20/PNR covers)
+- C Teleport marine fare sourcing
+- Lifeline AI auto-rebooking (4 AM incidents resolved without human intervention)
+- Full cost event tracking (every change, cancellation, refund attributed to crew + voyage)
+- Travel packet generation + push (SMS/email with token-based portal)
+- Ground logistics coordination (pickup sequencing, hotel routing)
+- *Compare: D-A charges $10/PNR and provides none of the above*
+
+### 5-Year Comparison
+| Solution | 5-Year Total |
+|----------|-------------|
+| **HELM + D-A/Atriis** | **$226,000** |
+| **Ops Normal (Phase 1 + PNR)** | **~$133,000** |
+| **Savings** | **~$93,000 (41%)** |
 
 ### Side-by-Side
 | | HELM + D-A | Ops Normal AI |
 |---|---|---|
-| 5-Year Cost | $226,000 | $222,000 |
+| Annual Cost (Phase 1) | $45,200 | ~$26,600 |
+| 5-Year Cost | $226,000 | ~$133,000 |
+| Day-One Savings | — | 41% |
 | Unified System | ❌ | ✅ |
 | Crew Change Workflow | ❌ | ✅ |
 | Change Portal (Finance) | ❌ | ✅ |
 | Travel Packets & Visa Tracking | ❌ | ✅ |
 | Ground Logistics & Hotel Picker | ❌ | ✅ |
+| Lifeline AI Auto-Rebooking | ❌ | ✅ |
 | Gusto Crew Sync | ❌ | ✅ |
 | Data Portability | ❌ | ✅ |
 | Tailored to SANSU Ops | ❌ | ✅ |
 
-> **$4,000 less over 5 years. Infinitely more product. Full data ownership.**
+> **$93,000 less over 5 years. 41% savings on day one. Infinitely more product. Full data ownership.**
 
 ---
 
@@ -140,41 +158,84 @@ Once deployed and running for all 3 SANSU vessels:
 
 ---
 
-## 6. Pricing — Subscription Model
+## 6. Pricing — Blended Subscription + PNR Model
 
 ### Phase 1: Ops + Crew + Travel Platform
-- **$2,500/month** ($30,000/year)
+- **$1,880/month** subscription ($22,600/year) **+ $20/PNR** service fee
 - Includes: Vessel ops, watch system, crew management, credentialing, crew change workflow, Change Portal, travel planning, ground logistics, travel packets, visa tracking, hotel picker, Gusto sync
 - Hosting, maintenance, support, and minor enhancements included
+- Estimated ~200 PNRs/yr for SANSU (3 vessels) → **~$26,600/yr total**
 
 ### Phase 2: + Engineering Module
-- **$4,000/month** ($48,000/year)
+- **$3,000/month** subscription ($36,000/year) **+ $20/PNR** service fee
 - Adds: Engineering logs, planned maintenance system, parts inventory, regulatory compliance tracking
 - All Phase 1 features + ongoing development included
+- Estimated at same volume → **~$40,000/yr total**
+
+### PNR Service Fee — What $20/PNR Covers
+| What D-A Charges $10/PNR For | What Our $20/PNR Covers |
+|------|------|
+| Basic booking pass-through | C Teleport marine fare sourcing |
+| — | Lifeline AI auto-rebooking (4 AM incidents, zero humans) |
+| — | Full cost event tracking (every change/cancel/refund → crew + voyage) |
+| — | Travel packet generation + push (SMS/email, token-based portal) |
+| — | Ground logistics coordination (pickup sequencing, hotel routing) |
 
 ### 5-Year Comparison
 
-| Solution | Year 1 | Years 2–5 | 5-Year Total |
-|----------|--------|-----------|--------------|
-| **Ops Normal (P1 → P2)** | $30,000 | $192,000 | **$222,000** |
-| **HELM + D-A/Atriis** | $45,200 | $180,800 | **$226,000** |
-| | | **Savings:** | **$4,000** |
+| Solution | Annual | 5-Year Total |
+|----------|--------|--------------|
+| **HELM + D-A/Atriis** | $45,200 | **$226,000** |
+| **Ops Normal (Phase 1 + PNR)** | ~$26,600 | **~$133,000** |
+| | **Savings:** | **~$93,000 (41%)** |
 
 ### Why This Wins
 
-**Same money. Ten times the product. You own the data.**
+**41% cheaper on day one. Ten times the product. You own the data.**
 
-- **$4,000 cheaper** over 5 years than HELM + D-A combined
+- **$93,000 cheaper** over 5 years than HELM + D-A combined
+- **41% savings** from the first invoice — not a break-even-in-year-3 story
 - **Unified system** — not two disconnected tools duct-taped together
-- D-A's $25k quote is stripped-down (no Duty of Care, no virtual cards, no reporting — those push it to $54k/yr)
+- D-A’s $25k quote is stripped-down (no Duty of Care, no virtual cards, no reporting — those push it to $54k/yr)
 - HELM serves 200+ vessels with one-size-fits-all; this is built for how SANSU actually operates
+- **$1,880/mo is less than what D-A charges just for travel** — and they can’t rebook your crew at 4 AM
 - **Data portability** — Supabase-backed, full SQL export anytime. Walk away from HELM and you leave with nothing.
-- Includes capabilities neither vendor offers at any price: crew change workflow, Change Portal, travel packets, visa builder, ground logistics, hotel picker, Gusto crew sync
+- Includes capabilities neither vendor offers at any price: crew change workflow, Change Portal, travel packets, visa builder, ground logistics, hotel picker, Lifeline AI, Gusto crew sync
 
 ### Post-V1 Integrations (Included in Subscription)
 - C Teleport API (travel booking automation) — ~28 hours to wire
 - Gusto crew sync — ~20 hours to wire
 - No additional cost to Standing Tide
+
+---
+
+## 7. White-Label Revenue Model
+
+Standing Tide (Eric Bardot) has a crew management contract with Lindblad Expeditions (~6 expedition ships, crews of 100–150). Once SANSU is proven, Standing Tide can offer the platform as a white-label solution to Lindblad.
+
+### Wholesale Pricing to Standing Tide
+| Item | Wholesale Rate | Notes |
+|------|---------------|-------|
+| Platform subscription | ~$1,200/mo/vessel | Standing Tide marks up at their discretion |
+| PNR service fee | $15/PNR | Standing Tide marks up to Lindblad (e.g., $25–35/PNR) |
+
+### Lindblad Estimated Volume
+- ~6 vessels, ~125 crew each, rotations every 2–4 weeks
+- Estimated 2,000–4,000+ PNRs/yr
+- Platform revenue: ~$86,400/yr (6 vessels × $1,200/mo × 12)
+- PNR revenue: $30,000–60,000/yr (at $15 wholesale)
+- **Total Lindblad account: ~$116k–146k/yr to Ops Normal**
+
+### Revenue at Scale
+
+| Customers | Subscription | PNR Fees | Total Annual |
+|---|---|---|---|
+| SANSU only | $22,600 | $4,000 | $26,600 |
+| + 2 direct clients | $67,800 | $12,000 | $79,800 |
+| + Lindblad (white-label) | $154,200 | $72,000 | $226,200 |
+| 10 direct + Lindblad | $312,200 | $112,000 | $424,200 |
+
+> Standing Tide becomes a channel partner, not just a customer. Their Lindblad contract becomes a distribution channel for the platform.
 
 ---
 
