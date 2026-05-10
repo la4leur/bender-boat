@@ -42,6 +42,16 @@ travel_records           → crew_members, assignments
 cost_events              → crew_members, voyages, travel_records, assignments
 sea_time_records         → crew_members, voyages
 users                    → crew_members (Supabase Auth)
+
+-- Weekly Crewing Report (Sam's Monday Report) --
+vessel_billets           → vessels, positions
+billet_assignments       → vessel_billets, crew_members
+crew_events              → crew_members, vessels, vessel_billets
+recruitment_pipeline     → vessel_billets, crew_members
+onboarding_checklists    → crew_members, vessels, vessel_billets
+vessel_status_periods    → vessels
+report_distribution      → vessels
+report_history           → users
 ```
 
 ---
@@ -535,6 +545,275 @@ last_login          timestamptz
 
 ---
 
+---
+
+## Weekly Crewing Report Tables
+
+*These tables power Sam's Monday crewing report — billet tracking, recruitment pipeline, onboarding, and automated report generation. Added to support push-button generation of the "Shipboard Crewing Update" that currently takes hours to compile manually from multiple spreadsheets.*
+
+### `vessel_billets`
+The vessel org chart — every required position that should be filled. This is the "should" side; `billet_assignments` is the "is" side. The gap between them = unfilled billets.
+
+```sql
+id                  uuid PK
+vessel_id           uuid FK → vessels
+position_id         uuid FK → positions        -- links to credential requirements via position_credential_req
+title               text NOT NULL              -- display name: "Engine Mechanic", "Seasonal Steward 3"
+department          text NOT NULL              -- "deck" | "engine" | "hotel" | "galley"
+rotation_name       text                       -- named rotation slot: "Former Garcia", "Meland", "Rodriguez"
+employment_type     text NOT NULL              -- "full_time_rotational" | "seasonal" | "temporary"
+is_required         boolean DEFAULT true       -- required billet vs. optional/seasonal
+effective_from      date                       -- when this billet was created/activated
+effective_to        date                       -- NULL = ongoing; set when billet is eliminated
+sort_order          int                        -- display order within department
+notes               text
+created_at          timestamptz
+updated_at          timestamptz
+```
+
+**Design notes:**
+- `position_id` links back to the existing `positions` table, which carries credential requirements. A billet is an *instance* of a position: the vessel might have one "AB" position definition but three AB billets (three ABs needed).
+- `rotation_name` is Standing Tide's convention for naming rotation slots after the crew member who originally held them. Makes scheduling discussions human-readable: "We need to fill the Meland rotation on Sea Bird."
+- `employment_type` drives report grouping — Sam's report separates full-time, seasonal, and temporary differently.
+
+---
+
+### `billet_assignments`
+Who fills each billet and when. The daily snapshot of this table against `vessel_billets` produces the unfilled billet count.
+
+```sql
+id                  uuid PK
+billet_id           uuid FK → vessel_billets
+crew_member_id      uuid FK → crew_members
+assigned_from       date NOT NULL              -- first day on the billet
+assigned_to         date                       -- NULL = current; set on disembarkation
+assignment_type     text NOT NULL              -- "permanent" | "fill_in" | "transfer" | "temporary"
+related_event_id    uuid FK → crew_events      -- why this assignment started/ended (transfer, fill-in for medical, etc.)
+notes               text
+created_at          timestamptz
+updated_at          timestamptz
+
+-- Constraint: no overlapping assignments for the same billet_id
+-- (only one person can fill a billet at a time)
+```
+
+**Unfilled billet calculation:**
+```sql
+-- Unfilled billets for a given week
+SELECT vb.vessel_id, vb.title, vb.department, vb.rotation_name,
+  SUM(CASE WHEN ba.id IS NULL THEN 1 ELSE 0 END) as unfilled_days
+FROM vessel_billets vb
+CROSS JOIN generate_series(week_start, week_end, '1 day') AS d(day)
+LEFT JOIN billet_assignments ba
+  ON ba.billet_id = vb.id
+  AND ba.assigned_from <= d.day
+  AND (ba.assigned_to IS NULL OR ba.assigned_to >= d.day)
+WHERE vb.is_required = true
+  AND vb.effective_from <= d.day
+  AND (vb.effective_to IS NULL OR vb.effective_to >= d.day)
+GROUP BY vb.vessel_id, vb.title, vb.department, vb.rotation_name
+HAVING SUM(CASE WHEN ba.id IS NULL THEN 1 ELSE 0 END) > 0;
+```
+
+---
+
+### `crew_events`
+Lifecycle events for crew members — terminations, resignations, medical disembarkations, transfers, LOA. Powers the "Notes" column in Sam's unfilled billet report and provides audit trail for billet gaps.
+
+```sql
+id                  uuid PK
+crew_member_id      uuid FK → crew_members
+vessel_id           uuid FK → vessels          -- which vessel this event relates to
+billet_id           uuid FK → vessel_billets   -- which billet was affected (nullable)
+event_type          text NOT NULL              -- "termination" | "resignation" | "medical_disembark"
+                                               -- | "loa" | "transfer" | "family_emergency"
+                                               -- | "promotion" | "contract_end" | "clearance_issue"
+event_date          date NOT NULL
+end_date            date                       -- for LOA: expected return date
+details             text                       -- "Terminated 3/3", "Medical disembarkation — rotator cuff"
+impact_on_billet    text                       -- "vacated" | "temporary_gap" | "no_impact"
+reported_by         uuid FK → users
+created_at          timestamptz
+```
+
+---
+
+### `recruitment_pipeline`
+Tracks open positions from "unfilled" through "offer signed" to "onboarding." Each row is a recruitment effort for a specific billet.
+
+```sql
+id                  uuid PK
+billet_id           uuid FK → vessel_billets   -- which billet we're recruiting for
+vessel_id           uuid FK → vessels          -- denormalized for easy querying
+status              text NOT NULL              -- "open" | "sourcing" | "candidate_identified"
+                                               -- | "offer_pending" | "offer_sent" | "awaiting_signature"
+                                               -- | "offer_signed" | "onboarding" | "filled" | "on_hold"
+candidate_name      text                       -- name before they're in the system
+candidate_id        uuid FK → crew_members     -- set once they become a crew_member record
+department          text                       -- denormalized: "deck" | "engine" | "hotel" | "galley"
+hire_type           text                       -- "new_hire" | "rehire" | "fill_in" | "promotion" | "transfer"
+employment_type     text                       -- "full_time_rotational" | "seasonal" | "temporary"
+date_needed         date                       -- when must this position be filled?
+anticipated_embark  date                       -- when will the candidate board?
+sourcing_notes      text                       -- recruiting channels, referrals, etc.
+offer_amount        numeric                    -- salary/day rate (private, admin-only)
+offer_sent_at       timestamptz
+offer_signed_at     timestamptz
+opened_at           timestamptz DEFAULT now()
+closed_at           timestamptz                -- set when status = 'filled' or cancelled
+closed_reason       text                       -- "filled" | "cancelled" | "merged" | "position_eliminated"
+updated_by          uuid FK → users
+updated_at          timestamptz
+created_at          timestamptz
+```
+
+**Pipeline statuses mapped from Sam's report:**
+| Sam's Report | System Status |
+|---|---|
+| *(blank — no candidate)* | `open` or `sourcing` |
+| "Candidate identified" (yellow) | `candidate_identified` |
+| "Need to Send Offer" | `offer_pending` |
+| "Awaiting Signature" | `awaiting_signature` |
+| "Offer Signed" | `offer_signed` |
+| "Fill-In" | `hire_type = 'fill_in'` + `filled` |
+
+---
+
+### `onboarding_checklists`
+Tracks new hires through the onboarding pipeline. Maps directly to the "Onboarding" table in Sam's weekly report.
+
+```sql
+id                  uuid PK
+crew_member_id      uuid FK → crew_members
+vessel_id           uuid FK → vessels
+billet_id           uuid FK → vessel_billets   -- which billet they're onboarding into
+position_title      text                       -- denormalized for report display
+hire_type           text NOT NULL              -- "new_hire" | "rehire" | "fill_in" | "promotion"
+employment_type     text NOT NULL              -- "full_time_rotational" | "seasonal" | "temporary"
+department          text NOT NULL
+travel_date         date                       -- when they travel to the vessel
+embarkation_date    date                       -- when they board
+rotation_name       text                       -- which rotation slot
+manager_role        text                       -- "Cap." | "CM" | "CE" | "HM" | "HC" | "EO" | "BO"
+status              text DEFAULT 'in_progress' -- "not_started" | "in_progress" | "complete" | "cancelled"
+completion_pct      int DEFAULT 0              -- 0-100, derived from items
+items               jsonb DEFAULT '[]'         -- checklist items:
+                                               -- [{ "key": "w4_submitted", "label": "W-4 Submitted",
+                                               --    "complete": true, "completed_at": "...", "required": true },
+                                               --  { "key": "stcw_verified", "label": "STCW Certs Verified",
+                                               --    "complete": false, "required": true }, ...]
+pipeline_id         uuid FK → recruitment_pipeline  -- links back to the recruitment effort
+notes               text
+created_at          timestamptz
+updated_at          timestamptz
+```
+
+---
+
+### `vessel_status_periods`
+Tracks vessel operational status over time. Needed because billets aren't "unfilled" the same way when a vessel is in wet dock or repositioning — Sam flags these in the report.
+
+```sql
+id                  uuid PK
+vessel_id           uuid FK → vessels
+status              text NOT NULL              -- "operational" | "repositioning" | "wet_dock"
+                                               -- | "dry_dock" | "layup" | "charter"
+start_date          date NOT NULL
+end_date            date                       -- NULL = current status
+location            text                       -- where the vessel is during this period
+notes               text                       -- "Repositioning from Panama to Portland"
+created_at          timestamptz
+```
+
+---
+
+### `report_distribution`
+Configurable distribution lists for automated reports. Sam's crewing update goes to 43 TO + 10 CC recipients.
+
+```sql
+id                  uuid PK
+report_type         text NOT NULL              -- "weekly_crewing" | "billet_summary" | "onboarding_status"
+vessel_id           uuid FK → vessels          -- NULL = all vessels
+recipient_name      text NOT NULL
+recipient_email     text NOT NULL
+recipient_type      text NOT NULL              -- "to" | "cc" | "bcc"
+department          text                       -- for filtering: "deck" | "engine" | "hotel" | "shore"
+organization        text                       -- "Standing Tide" | "Lindblad" | etc.
+is_active           boolean DEFAULT true
+notes               text
+created_at          timestamptz
+```
+
+---
+
+### `report_history`
+Audit log of generated reports. Every time the button is pressed, a record is created.
+
+```sql
+id                  uuid PK
+report_type         text NOT NULL              -- "weekly_crewing"
+report_date         date NOT NULL              -- the Monday this report covers
+generated_by        uuid FK → users
+generated_at        timestamptz
+vessel_ids          uuid[]                     -- which vessels were included
+recipient_count     int                        -- how many people received it
+attachments         jsonb                      -- [{ "name": "Comings_Goings_5_4_26.xlsx", "url": "..." },
+                                               --  { "name": "Unfilled_Billets_5_4_26.xlsx", "url": "..." },
+                                               --  { "name": "Billet_Trend_5_4_26.png", "url": "..." }]
+email_subject       text                       -- "Shipboard Crewing Update: 5/4/26"
+email_body_html     text                       -- stored for audit/resend
+status              text                       -- "generated" | "sent" | "failed"
+error_details       text
+notes               text
+```
+
+---
+
+## Field Additions to Existing Tables
+
+### `crew_members` — Employment Classification
+```sql
+ALTER TABLE crew_members ADD COLUMN employment_type text;
+  -- "full_time_rotational" | "seasonal" | "temporary"
+ALTER TABLE crew_members ADD COLUMN hire_type text;
+  -- "new_hire" | "rehire" | "fill_in" | "promotion"
+ALTER TABLE crew_members ADD COLUMN rotation_name text;
+  -- Named rotation slot: "Former Garcia", "Meland"
+ALTER TABLE crew_members ADD COLUMN department text;
+  -- Primary department: "deck" | "engine" | "hotel" | "galley"
+ALTER TABLE crew_members ADD COLUMN reports_to text;
+  -- Supervisor role: "Cap." | "CM" | "CE" | "HM" | "HC"
+```
+
+### `travel_records` — Granular Booking Status
+```sql
+ALTER TABLE travel_records ADD COLUMN flight_booked boolean DEFAULT false;
+ALTER TABLE travel_records ADD COLUMN hotel_booked boolean DEFAULT false;
+ALTER TABLE travel_records ADD COLUMN visa_cleared boolean;
+ALTER TABLE travel_records ADD COLUMN touchbase_sent boolean DEFAULT false;
+ALTER TABLE travel_records ADD COLUMN touchbase_sent_at timestamptz;
+ALTER TABLE travel_records ADD COLUMN crew_change_notes text;
+  -- Free-text notes for the Comings & Goings report
+```
+
+### `positions` — Reporting Hierarchy
+```sql
+ALTER TABLE positions ADD COLUMN reports_to_position_id uuid FK → positions;
+  -- Who does this role report to? Enables manager column in onboarding report
+ALTER TABLE positions ADD COLUMN manager_abbreviation text;
+  -- "Cap." | "CM" | "CE" | "HM" | "HC" — for report display
+```
+
+---
+
+## Supabase Storage Buckets (Addition)
+
+```
+reports/            -- generated Excel files, trend charts, email snapshots (private, admin/finance access)
+```
+
+---
+
 ## Key Constraints & Business Rules (Enforced at DB Level)
 
 ```sql
@@ -549,6 +828,24 @@ last_login          timestamptz
 
 -- 4. Voyage cannot be closed if any watch entry is still open (status = 'open')
 -- Enforced via trigger on voyages UPDATE where status = 'completed'
+
+-- 5. No overlapping billet assignments for the same billet
+-- Only one person can fill a billet at a time
+-- Enforced via exclusion constraint on billet_assignments(billet_id, assigned_from, assigned_to)
+
+-- 6. Recruitment pipeline: only one active recruitment per billet
+-- WHERE status NOT IN ('filled', 'cancelled', 'on_hold')
+-- Enforced via partial unique index
+
+-- 7. Onboarding checklists: only one active checklist per crew member
+-- WHERE status IN ('not_started', 'in_progress')
+-- Enforced via partial unique index
+
+-- 8. Vessel billets: effective_to must be >= effective_from when set
+-- Enforced via CHECK constraint
+
+-- 9. Billet assignment dates must fall within the billet's effective period
+-- Enforced via trigger on INSERT/UPDATE
 ```
 
 ---
@@ -574,6 +871,7 @@ crew-photos/        -- profile photos (private)
 | `officer` | Their voyage's log entries | Watch entries, nav log, ship's rounds for their watch |
 | `engineer` | Their voyage's engineering data | Engineering rounds for their watch |
 | `finance` | Travel records, cost events, crew names, voyage names | Cost events, travel records (financial fields only) |
+| `crewing` | Billets, assignments, recruitment, onboarding, crew events, travel status, reports | Billet assignments, recruitment pipeline, onboarding checklists, crew events, report generation |
 | `readonly` | All records | Nothing |
 
 ---
