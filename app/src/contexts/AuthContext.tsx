@@ -1,4 +1,78 @@
-{
-  "log": "import { Routes, Route } from 'react-router-dom'\nimport { AuthProvider } from './contexts/AuthContext'\nimport ProtectedRoute from './components/ProtectedRoute'\nimport Layout from './components/Layout'\nimport Login from './pages/Login'\nimport Dashboard from './pages/Dashboard'\nimport CrewRoster from './pages/CrewRoster'\nimport Vessels from './pages/Vessels'\nimport Credentials from './pages/Credentials'\nimport Schedule from './pages/Schedule'\n\nexport default function App() {\n  return (\n    <AuthProvider>\n      <Routes>\n        <Route path=\"/login\" element={<Login />} />\n        <Route element={<ProtectedRoute><Layout /></ProtectedRoute>}>\n          <Route path=\"/\" element={<Dashboard />} />\n          <Route path=\"/crew\" element={<CrewRoster />} />\n          <Route path=\"/vessels\" element={<Vessels />} />\n          <Route path=\"/credentials\" element={<Credentials />} />\n          <Route path=\"/schedule\" element={<Schedule />} />\n        </Route>\n      </Routes>\n    </AuthProvider>\n  )\n}===\nimport React from 'react'\nimport ReactDOM from 'react-dom/client'\nimport { BrowserRouter } from 'react-router-dom'\nimport App from './App'\nimport './index.css'\n\nReactDOM.createRoot(document.getElementById('root')!).render(\n  <React.StrictMode>\n    <BrowserRouter>\n      <App />\n    </BrowserRouter>\n  </React.StrictMode>\n)\n===\n@tailwind base;\n@tailwind components;\n@tailwind utilities;\n\nbody {\n  margin: 0;\n  -webkit-font-smoothing: antialiased;\n  -moz-osx-font-smoothing: grayscale;\n}\n===\nimport { createClient } from '@supabase/supabase-js'\n\nconst supabaseUrl = 'https://rfzkhvmycgspsieymsap.supabase.co'\nconst supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJmemtodm15Y2dzcHNpZXltc2FwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA0MTcxMDcsImV4cCI6MjA4NTk5MzEwN30.88bl9KfnVgZa8sISxuzWcqEbORlADSraXZ70Vkro8rA'\n\nexport const supabase = createClient(supabaseUrl, supabaseAnonKey)===\nimport { createContext, useContext, useEffect, useState, ReactNode } from 'react'\nimport { Session, User } from '@supabase/supabase-js'\nimport { supabase } from '../lib/supabase'\n\ninterface UserProfile {\n  id: string\n  org_id: string\n  role: string\n  display_name: string\n}\n\ninterface AuthContextType {\n  session: Session | null\n  user: User | null\n  profile: UserProfile | null\n  loading: boolean\n  signIn: (email: string, password: string) => Promise<{ error: any }>\n  signOut: () => Promise<void>\n}\n\nconst AuthContext = createContext<AuthContextType | undefined>(undefined)\n\nexport function AuthProvider({ children }: { children: ReactNode }) {\n  const [session, setSession] = useState<Session | null>(null)\n  const [user, setUser] = useState<User | null>(null)\n  const [profile, setProfile] = useState<UserProfile | null>(null)\n  const [loading, setLoading] = useState(true)\n\n  useEffect(() => {\n    supabase.auth.getSession().then(({ data: { session } }) => {\n      setSession(session)\n      setUser(session?.user ?? null)\n      if (session?.user) loadProfile(session.user.id)\n      else setLoading(false)\n    })\n\n    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {\n      setSession(session)\n      setUser(session?.user ?? null)\n      if (session?.user) loadProfile(session.user.id)\n      else { setProfile(null); setLoading(false) }\n    })\n\n    return () => subscription.unsubscribe()\n  }, [])\n\n  async function loadProfile(userId: string) {\n    const { data } = await supabase\n      .from('user_profiles')\n      .select('*')\n      .eq('id', userId)\n      .single()\n    setProfile(data)\n    setLoading(false)\n  }\n\n  async function signIn(email: string, password: string) {\n    const { error } = await supabase.auth.signInWithPassword({ email, password })\n    return { error }\n  }\n\n  async function signOut() {\n    await supabase.auth.signOut()\n    setProfile(null)\n  }\n\n  return (\n    <AuthContext.Provider value={{ session, user, profile, loading, signIn, signOut }}>\n      {children}\n    </AuthContext.Provider>\n  )\n}\n\nexport function useAuth() {\n  const context = useContext(AuthContext)\n  if (!context) throw new Error('useAuth must be used within AuthProvider')\n  return context\n}===\nimport { NavLink, Outlet } from 'react-router-dom'\nimport { useAuth } from '../contexts/AuthContext'\nimport { LayoutDashboard, Users, Ship, LogOut, Anchor, Shield, Calendar } from 'lucide-react'\n\nconst navItems = [\n  { to: '/', icon: LayoutDashboard, label: 'Dashboard' },\n  { to: '/crew', icon: Users, label: 'Crew Roster' },\n  { to: '/vessels', icon: Ship, label: 'Vessels' },\n  { to: '/credentials', icon: Shield, label: 'Credentials' },\n  { to: '/schedule', icon: Calendar, label: 'Schedule' },\n]\n\nexport default function Layout() {\n  const { profile, signOut } = useAuth()\n\n  return (\n    <div className=\"min-h-screen flex bg-slate-50\">\n      {/* Sidebar */}\n      <aside className=\"w-64 bg-gradient-to-b from-[#0d1423] to-[#1a2846] text-white flex flex-col\">\n        {/* Logo */}\n        <div className=\"p-6 border-b border-white/10\">\n          <div className=\"flex items-center gap-3\">\n            <div className=\"w-10 h-10 rounded-lg bg-cyan-500 flex items-center justify-center\">\n              <Anchor className=\"w-6 h-6 text-white\" />\n            </div>\n            <div>\n              <h1 className=\"text-lg font-bold tracking-tight\">Sentinel-Core</h1>\n              <p className=\"text-xs text-cyan-300/70\">Ops Normal AI</p>\n            </div>\n          </div>\n        </div>\n\n        {/* Navigation */}\n        <nav className=\"flex-1 p-4 space-y-1\">\n          {navItems.map(({ to, icon: Icon, label }) => (\n            <NavLink\n              key={to}\n              to={to}\n              end={to === '/'}\n              className={({ isActive }) =>\n                `flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium transition-colors ${\n                  isActive\n                    ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-400/30'\n                    : 'text-slate-300 hover:bg-white/5 hover:text-white'\n                }`\n              }\n            >\n              <Icon className=\"w-5 h-5\" />\n              {label}\n            </NavLink>\n          ))}\n        </nav>\n\n        {/* User */}\n        <div className=\"p-4 border-t border-white/10\">\n          <div className=\"flex items-center justify-between\">\n            <div>\n              <p className=\"text-sm font-medium\">{profile?.display_name || 'User'}</p>\n              <p className=\"text-xs text-slate-400 capitalize\">{profile?.role?.replace('_', ' ')}</p>\n            </div>\n            <button onClick={signOut} className=\"p-2 rounded-lg hover:bg-white/10 text-slate-400 hover:text-white transition-colors\">\n              <LogOut className=\"w-4 h-4\" />\n            </button>\n          </div>\n        </div>\n      </aside>\n\n      {/* Main Content */}\n      <main className=\"flex-1 overflow-auto\">\n        <Outlet />\n      </main>\n    </div>\n  )\n}===\nimport { Navigate } from 'react-router-dom'\nimport { useAuth } from '../contexts/AuthContext'\n\nexport default function ProtectedRoute({ children }: { children: React.ReactNode }) {\n  const { session, loading } = useAuth()\n\n  if (loading) {\n    return (\n      <div className=\"min-h-screen flex items-center justify-center bg-slate-50\">\n        <div className=\"animate-spin rounded-full h-8 w-8 border-b-2 border-cyan-600\"></div>\n      </div>\n    )\n  }\n\n  if (!session) return <Navigate to=\"/login\" replace />\n  return <>{children}</>\n}",
-  "exitCode": 0
+import { createContext, useContext, useEffect, useState, ReactNode } from 'react'
+import { Session, User } from '@supabase/supabase-js'
+import { supabase } from '../lib/supabase'
+
+interface UserProfile {
+  id: string
+  org_id: string
+  role: string
+  display_name: string
+}
+
+interface AuthContextType {
+  session: Session | null
+  user: User | null
+  profile: UserProfile | null
+  loading: boolean
+  signIn: (email: string, password: string) => Promise<{ error: any }>
+  signOut: () => Promise<void>
+}
+
+const AuthContext = createContext<AuthContextType | undefined>(undefined)
+
+export function AuthProvider({ children }: { children: ReactNode }) {
+  const [session, setSession] = useState<Session | null>(null)
+  const [user, setUser] = useState<User | null>(null)
+  const [profile, setProfile] = useState<UserProfile | null>(null)
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session)
+      setUser(session?.user ?? null)
+      if (session?.user) loadProfile(session.user.id)
+      else setLoading(false)
+    })
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session)
+      setUser(session?.user ?? null)
+      if (session?.user) loadProfile(session.user.id)
+      else { setProfile(null); setLoading(false) }
+    })
+
+    return () => subscription.unsubscribe()
+  }, [])
+
+  async function loadProfile(userId: string) {
+    const { data } = await supabase
+      .from('user_profiles')
+      .select('*')
+      .eq('id', userId)
+      .single()
+    setProfile(data)
+    setLoading(false)
+  }
+
+  async function signIn(email: string, password: string) {
+    const { error } = await supabase.auth.signInWithPassword({ email, password })
+    return { error }
+  }
+
+  async function signOut() {
+    await supabase.auth.signOut()
+    setProfile(null)
+  }
+
+  return (
+    <AuthContext.Provider value={{ session, user, profile, loading, signIn, signOut }}>
+      {children}
+    </AuthContext.Provider>
+  )
+}
+
+export function useAuth() {
+  const context = useContext(AuthContext)
+  if (!context) throw new Error('useAuth must be used within AuthProvider')
+  return context
 }
