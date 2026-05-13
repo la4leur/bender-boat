@@ -1,15 +1,23 @@
 import { useEffect, useState } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import { supabase } from '../supabase'
 import { useFleet } from '../FleetProvider'
 
 export default function Crew() {
   const { selectedFleet } = useFleet()
+  const [searchParams, setSearchParams] = useSearchParams()
   const [crew, setCrew] = useState<any[]>([])
-  const [search, setSearch] = useState('')
+  const [search, setSearch] = useState(searchParams.get('search') || '')
   const [statusFilter, setStatusFilter] = useState('all')
   const [deptFilter, setDeptFilter] = useState('all')
   const [departments, setDepartments] = useState<string[]>([])
   const [total, setTotal] = useState(0)
+
+  // Sync URL params
+  useEffect(() => {
+    const s = searchParams.get('search')
+    if (s && s !== search) setSearch(s)
+  }, [searchParams])
 
   useEffect(() => { loadCrew() }, [selectedFleet, search, statusFilter, deptFilter])
 
@@ -23,7 +31,6 @@ export default function Crew() {
     const { data, count } = await q.order('last_name').limit(100)
     setCrew(data || []); setTotal(count || 0)
 
-    // Load departments for filter
     if (departments.length === 0) {
       let dq = supabase.from('crew_members').select('department')
       if (selectedFleet) dq = dq.eq('fleet_id', selectedFleet.id)
@@ -31,6 +38,12 @@ export default function Crew() {
       const unique = [...new Set((depts || []).map((d: any) => d.department).filter(Boolean))].sort()
       setDepartments(unique as string[])
     }
+  }
+
+  function updateSearch(val: string) {
+    setSearch(val)
+    if (val) setSearchParams({ search: val })
+    else setSearchParams({})
   }
 
   const statusColors: Record<string, string> = {
@@ -49,11 +62,9 @@ export default function Crew() {
           <p className="text-slate-400 text-sm">{total} crew members</p>
         </div>
       </div>
-
-      {/* Filters */}
       <div className="flex gap-3 mb-4">
-        <input type="text" placeholder="Search by name or email..." value={search} onChange={e => setSearch(e.target.value)}
-          className="flex-1 px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-white text-sm focus:ring-1 focus:ring-cyan-500" />
+        <input type="text" placeholder="Search by name or email..." value={search} onChange={e => updateSearch(e.target.value)}
+          className="flex-1 px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-white text-sm focus:ring-1 focus:ring-cyan-500 focus:outline-none" />
         <select value={statusFilter} onChange={e => setStatusFilter(e.target.value)}
           className="px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-white text-sm">
           <option value="all">All Status</option>
@@ -68,8 +79,6 @@ export default function Crew() {
           {departments.map(d => <option key={d} value={d}>{d}</option>)}
         </select>
       </div>
-
-      {/* Table */}
       <div className="bg-slate-800 rounded-xl border border-slate-700 overflow-hidden">
         <table className="w-full">
           <thead>
@@ -92,9 +101,7 @@ export default function Crew() {
                 <td className="px-4 py-3 text-sm text-slate-300">{c.rotation_name || '—'}</td>
                 <td className="px-4 py-3 text-xs text-slate-400">{c.employment_type || '—'}</td>
                 <td className="px-4 py-3">
-                  <span className={`text-xs px-2 py-0.5 rounded ${statusColors[c.status] || 'bg-slate-600 text-slate-300'}`}>
-                    {c.status}
-                  </span>
+                  <span className={`text-xs px-2 py-0.5 rounded ${statusColors[c.status] || 'bg-slate-600 text-slate-300'}`}>{c.status}</span>
                 </td>
                 <td className="px-4 py-3 text-xs text-slate-400">{c.email || c.phone || '—'}</td>
               </tr>

@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import { supabase } from '../supabase'
 import { useFleet } from '../FleetProvider'
 
@@ -9,6 +10,7 @@ interface Vessel {
 
 export default function Vessels() {
   const { selectedFleet, fleets } = useFleet()
+  const [searchParams] = useSearchParams()
   const [vessels, setVessels] = useState<Vessel[]>([])
   const [selected, setSelected] = useState<Vessel | null>(null)
   const [positions, setPositions] = useState<any[]>([])
@@ -20,7 +22,15 @@ export default function Vessels() {
     if (selectedFleet) q = q.eq('fleet_id', selectedFleet.id)
     else q = q.not('fleet_id', 'is', null)
     const { data } = await q.order('name')
-    setVessels(data || [])
+    const vList = data || []
+    setVessels(vList)
+
+    // Auto-select from URL param
+    const selectId = searchParams.get('select')
+    if (selectId) {
+      const v = vList.find(v => v.id === selectId)
+      if (v) { selectVessel(v); return }
+    }
     setSelected(null); setPositions([])
   }
 
@@ -53,7 +63,6 @@ export default function Vessels() {
           ))}
           {vessels.length === 0 && <p className="text-slate-500 text-sm">No vessels in this fleet.</p>}
         </div>
-
         <div className="col-span-2">
           {selected ? (
             <div className="bg-slate-800 rounded-xl border border-slate-700">
